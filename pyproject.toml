@@ -27,6 +27,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+discovery = ["zeroconf>=0.38"]
 dev = ["pytest>=7", "pytest-asyncio>=0.23", "respx>=0.20", "mypy", "ruff", "pyright>=1.1.390"]
 
 [project.urls]

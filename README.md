@@ -223,12 +223,79 @@ http = httpx.AsyncClient(verify="/path/to/ca.pem", timeout=30.0)
 client = IMessageRelayClient("relay.example.com", token, client=http)
 ```
 
+## Synchronous usage
+
+If your automation framework can't use `asyncio`, drop in `SyncIMessageRelayClient` — it mirrors
+every method on the async client but runs synchronously:
+
+```python
+from imessagerelay import SyncIMessageRelayClient
+
+with SyncIMessageRelayClient("10.0.0.5", "my-secret-token") as client:
+    job = client.send_message("Dinner's ready!", to="mom")
+    print(job.id, job.state)
+
+    aliases = client.list_aliases()
+    print(aliases)
+```
+
+For lifecycle flexibility, call `.close()` directly (or use `try/finally`):
+
+```python
+client = SyncIMessageRelayClient("10.0.0.5", "my-secret-token")
+try:
+    client.add_alias("garage", "+15559876543")
+finally:
+    client.close()
+```
+
+The sync client manages its own event loop internally. For advanced TLS control, inject your own
+`httpx.AsyncClient` the same way as the async variant (pass `client=`).
+
 ## Discovery (mDNS)
 
-The iMessageRelay server advertises itself over Bonjour/mDNS as `_imessagerelay._tcp.local.`, so you
-can discover its host and port on the local network instead of hard-coding them (for example with
-`zeroconf`). This library does not perform discovery itself; resolve the address however you like,
-then pass the result to `IMessageRelayClient` or `IMessageRelayClient.from_url`.
+The iMessageRelay server advertises itself over Bonjour/mDNS as `_imessagerelay._tcp.local.`, so
+you can discover it without hard-coding its IP. Install the `discovery` extra first:
+
+```bash
+pip install "imessagerelay[discovery]"
+```
+
+### Async discovery
+
+```python
+from imessagerelay import IMessageRelayClient
+
+async def main() -> None:
+    client = await IMessageRelayClient.discover("my-secret-token")
+    async with client:
+        job = await client.send_message("Found you!", to="mom")
+```
+
+Standalone — returns `(host, port)`:
+
+```python
+from imessagerelay.discovery import async_discover
+
+host, port = await async_discover(timeout=5.0)
+```
+
+### Sync discovery
+
+```python
+from imessagerelay import SyncIMessageRelayClient
+
+with SyncIMessageRelayClient.discover("my-secret-token") as client:
+    job = client.send_message("Found you!", to="mom")
+```
+
+Standalone:
+
+```python
+from imessagerelay.discovery import discover
+
+host, port = discover(timeout=5.0)
+```
 
 ## Related projects
 

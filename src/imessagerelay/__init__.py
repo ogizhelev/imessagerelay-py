@@ -1,6 +1,6 @@
-"""imessagerelay: async Python client for the iMessageRelay HTTP API.
+"""imessagerelay: async and sync Python client for the iMessageRelay HTTP API.
 
-Example:
+Example (async):
     >>> import asyncio
     >>> from imessagerelay import IMessageRelayClient
     >>>
@@ -10,6 +10,13 @@ Example:
     ...         print(job.id, job.state)
     >>>
     >>> asyncio.run(main())  # doctest: +SKIP
+
+Example (sync):
+    >>> from imessagerelay import SyncIMessageRelayClient
+    >>>
+    >>> with SyncIMessageRelayClient("10.0.0.5", "my-token") as client:
+    ...     job = client.send_message("hello", to="mom")
+    ...     print(job.id, job.state)
 """
 
 from __future__ import annotations
@@ -31,11 +38,13 @@ from .exceptions import (
     error_for_status,
 )
 from .models import Alias, Attachment, Health, Job, JobState
+from .sync import SyncIMessageRelayClient
 
 __version__ = "0.1.0"
 
 __all__ = [
     "IMessageRelayClient",
+    "SyncIMessageRelayClient",
     "Job",
     "JobState",
     "Health",

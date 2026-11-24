@@ -117,6 +117,41 @@ class IMessageRelayClient:
         return value, port
 
     @classmethod
+    async def discover(
+        cls,
+        token: str,
+        *,
+        discovery_timeout: float = 5.0,
+        **kwargs: object,
+    ) -> IMessageRelayClient:
+        """Auto-discover a server via mDNS and create a client.
+
+        Browses for ``_imessagerelay._tcp.local.`` Bonjour/mDNS advertisements
+        and connects to the first server found. Install the ``discovery`` extra
+        to enable::
+
+            pip install "imessagerelay[discovery]"
+
+        Args:
+            token: Bearer token for authentication.
+            discovery_timeout: Seconds to wait for mDNS discovery.
+            **kwargs: Extra keyword arguments forwarded to :meth:`__init__`.
+
+        Returns:
+            A configured :class:`IMessageRelayClient`.
+
+        Raises:
+            ImportError: If ``zeroconf`` is not installed.
+            IMessageRelayConnectionError: If no server is found in time.
+        """
+        from .discovery import async_discover
+
+        host, port = await async_discover(timeout=discovery_timeout)
+        extra: dict[str, object] = dict(kwargs)
+        extra.setdefault("port", port)
+        return cls(host, token, **extra)  # type: ignore[arg-type]
+
+    @classmethod
     def from_url(cls, url: str, token: str, **kwargs: object) -> IMessageRelayClient:
         """Construct a client from a full base URL.
 
