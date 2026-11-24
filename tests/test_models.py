@@ -21,7 +21,7 @@ class TestJobState:
 
     def test_is_str_enum(self) -> None:
         assert isinstance(JobState.QUEUED, str)
-        assert JobState.QUEUED == "queued"
+        assert JobState.QUEUED == "queued"  # type: ignore[comparison-overlap]
 
     @pytest.mark.parametrize(
         "state, terminal",

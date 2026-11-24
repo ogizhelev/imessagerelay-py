@@ -13,6 +13,7 @@ import os
 import uuid
 from collections.abc import Sequence
 from types import TracebackType
+from typing import Any, cast
 from urllib.parse import quote, urlsplit
 
 import httpx
@@ -169,10 +170,10 @@ class IMessageRelayClient:
         method: str,
         path: str,
         *,
-        json: dict | None = None,
+        json: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
         auth: bool = True,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Perform an HTTP request and return the decoded JSON body.
 
         Args:
@@ -226,7 +227,7 @@ class IMessageRelayClient:
         return payload if isinstance(payload, dict) else {}
 
     @staticmethod
-    def _decode_json(response: httpx.Response) -> dict | None:
+    def _decode_json(response: httpx.Response) -> dict[str, Any] | None:
         """Decode a response body as JSON, tolerating an empty body.
 
         Args:
@@ -238,10 +239,12 @@ class IMessageRelayClient:
         if not response.content:
             return None
         try:
-            data = response.json()
+            data: Any = response.json()
         except ValueError:
             return None
-        return data if isinstance(data, dict) else None
+        if isinstance(data, dict):
+            return cast("dict[str, Any]", data)
+        return None
 
     async def health(self) -> Health:
         """Fetch the server's health snapshot.
@@ -282,7 +285,7 @@ class IMessageRelayClient:
 
         key = idempotency_key if idempotency_key else uuid.uuid4().hex
 
-        body: dict = {"to": recipients, "text": text}
+        body: dict[str, Any] = {"to": recipients, "text": text}
         if attach is not None:
             body["attach"] = attach.to_payload()
 

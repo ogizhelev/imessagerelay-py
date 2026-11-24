@@ -13,6 +13,7 @@ import mimetypes
 import os
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 __all__ = [
     "JobState",
@@ -68,9 +69,7 @@ class JobState(str, Enum):
             return cls(value)
         except ValueError:
             valid = ", ".join(sorted(member.value for member in cls))
-            raise ValueError(
-                f"Unknown job state {value!r}; expected one of: {valid}"
-            ) from None
+            raise ValueError(f"Unknown job state {value!r}; expected one of: {valid}") from None
 
 
 def _parse_datetime(value: str | None) -> datetime.datetime | None:
@@ -113,7 +112,7 @@ class Job:
     state: JobState
 
     @classmethod
-    def from_dict(cls, data: dict) -> Job:
+    def from_dict(cls, data: dict[str, Any]) -> Job:
         """Build a :class:`Job` from a decoded JSON object.
 
         Args:
@@ -145,10 +144,10 @@ class Health:
     uptime: str
     last_callback_at: datetime.datetime | None
     tls_expires_at: datetime.datetime | None
-    raw: dict
+    raw: dict[str, Any]
 
     @classmethod
-    def from_dict(cls, data: dict) -> Health:
+    def from_dict(cls, data: dict[str, Any]) -> Health:
         """Build a :class:`Health` from a decoded JSON object.
 
         Missing or ``None`` fields are tolerated; ISO 8601 timestamps are
@@ -252,13 +251,13 @@ class Attachment:
         encoded = base64.b64encode(raw).decode("ascii")
         return cls(data=encoded, name=name, mime=mime)
 
-    def to_payload(self) -> dict:
+    def to_payload(self) -> dict[str, Any]:
         """Serialise to the JSON shape expected by ``POST /send``.
 
         Returns:
             A mapping with ``data`` and ``name``, plus ``mime`` when it is set.
         """
-        payload: dict = {"data": self.data, "name": self.name}
+        payload: dict[str, Any] = {"data": self.data, "name": self.name}
         if self.mime is not None:
             payload["mime"] = self.mime
         return payload

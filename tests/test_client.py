@@ -216,9 +216,7 @@ class TestSendMessage:
         assert body["to"] == "mom,dad,sis"
 
     @respx.mock
-    async def test_idempotency_key_auto_generated_unique(
-        self, client: IMessageRelayClient
-    ) -> None:
+    async def test_idempotency_key_auto_generated_unique(self, client: IMessageRelayClient) -> None:
         route = respx.post(f"{BASE_URL}/send").mock(
             return_value=httpx.Response(202, json={"id": "x", "state": "queued"})
         )
@@ -328,9 +326,7 @@ class TestErrorMapping:
 class TestTransportErrors:
     @respx.mock
     async def test_timeout_maps_to_timeout_error(self, client: IMessageRelayClient) -> None:
-        respx.get(f"{BASE_URL}/health").mock(
-            side_effect=httpx.TimeoutException("timed out")
-        )
+        respx.get(f"{BASE_URL}/health").mock(side_effect=httpx.TimeoutException("timed out"))
         with pytest.raises(IMessageRelayTimeoutError):
             await client.health()
 
@@ -338,9 +334,7 @@ class TestTransportErrors:
     async def test_connect_error_maps_to_connection_error(
         self, client: IMessageRelayClient
     ) -> None:
-        respx.get(f"{BASE_URL}/health").mock(
-            side_effect=httpx.ConnectError("refused")
-        )
+        respx.get(f"{BASE_URL}/health").mock(side_effect=httpx.ConnectError("refused"))
         with pytest.raises(IMessageRelayConnectionError):
             await client.health()
 
@@ -412,9 +406,7 @@ class TestAliases:
     @respx.mock
     async def test_list_aliases(self, client: IMessageRelayClient) -> None:
         respx.get(f"{BASE_URL}/aliases").mock(
-            return_value=httpx.Response(
-                200, json={"mom": "+359123", "work": "a@example.com"}
-            )
+            return_value=httpx.Response(200, json={"mom": "+359123", "work": "a@example.com"})
         )
         aliases = await client.list_aliases()
         assert aliases == {"mom": "+359123", "work": "a@example.com"}
@@ -449,9 +441,7 @@ class TestAliases:
     @respx.mock
     async def test_add_alias_validation_error(self, client: IMessageRelayClient) -> None:
         respx.post(f"{BASE_URL}/alias").mock(
-            return_value=httpx.Response(
-                400, json={"error": "Required: name and contact fields"}
-            )
+            return_value=httpx.Response(400, json={"error": "Required: name and contact fields"})
         )
         with pytest.raises(ValidationError) as exc_info:
             await client.add_alias("", "")
@@ -462,8 +452,7 @@ class TestAliases:
         route = respx.delete(f"{BASE_URL}/alias/mom").mock(
             return_value=httpx.Response(200, json={"deleted": "mom"})
         )
-        result = await client.remove_alias("mom")
-        assert result is None
+        await client.remove_alias("mom")
         assert route.called
 
     @respx.mock

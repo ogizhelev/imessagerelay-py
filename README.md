@@ -129,7 +129,7 @@ from imessagerelay import JobState
 job = await client.send_message("Ping", to="mom")
 final = await client.wait_for_job(job.id, poll_interval=1.0, timeout=60.0)
 
-if final.state is JobState.SUBMITTED:   # or: final.state.is_success
+if final.state is JobState.SUBMITTED:  # or: final.state.is_success
     print("Delivered to the Messages app")
 elif final.state is JobState.FAILED:
     print("Permanently rejected")

@@ -8,6 +8,8 @@ subclasses via :func:`error_for_status`.
 
 from __future__ import annotations
 
+from typing import Any
+
 __all__ = [
     "IMessageRelayError",
     "IMessageRelayConnectionError",
@@ -57,12 +59,12 @@ class APIError(IMessageRelayError):
         message: str,
         *,
         status_code: int,
-        payload: dict | None = None,
+        payload: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(message)
         self.message: str = message
         self.status_code: int = status_code
-        self.payload: dict | None = payload
+        self.payload: dict[str, Any] | None = payload
 
     def __str__(self) -> str:
         return f"[{self.status_code}] {self.message}"
@@ -103,7 +105,7 @@ class ServerError(APIError):
 def error_for_status(
     status_code: int,
     message: str,
-    payload: dict | None,
+    payload: dict[str, Any] | None,
 ) -> APIError:
     """Build the appropriate :class:`APIError` subclass for a status code.
 
